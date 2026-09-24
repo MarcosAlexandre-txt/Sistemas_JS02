@@ -1,6 +1,3 @@
-// server.js
-// API REST - Sistema de Controle de Produção com Estoque e Relatórios
-// Node.js + Express
 
 const express = require('express');
 const app = express();
@@ -8,18 +5,13 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-// -----------------------------------------------------------------------
 // "Banco de dados" em memória
-// -----------------------------------------------------------------------
 let ordens = [];
 
-// -----------------------------------------------------------------------
-// Funções internas / regras de negócio
-// -----------------------------------------------------------------------
 
-/**
- * Verifica se já existe uma ordem com o mesmo codigoOrdem.
- */
+// Funções internas / regras de negócio
+
+// Verifica se já existe uma ordem com o mesmo codigoOrdem.
 function codigoOrdemExiste(codigoOrdem, ignorarIndice = -1) {
   return ordens.some((ordem, indice) => {
     if (indice === ignorarIndice) return false;
@@ -28,10 +20,8 @@ function codigoOrdemExiste(codigoOrdem, ignorarIndice = -1) {
   });
 }
 
-/**
- * Valida o tipoProduto usando um switch (1, 2 ou 3).
- * Retorna true se válido, false caso contrário.
- */
+// Valida o tipoProduto usando um switch (1, 2 ou 3).
+// Retorna true se válido, false caso contrário.
 function tipoProdutoValido(tipoProduto) {
   const tipo = Number(tipoProduto);
   switch (tipo) {
@@ -44,10 +34,7 @@ function tipoProdutoValido(tipoProduto) {
   }
 }
 
-/**
- * Valida os campos obrigatórios de uma ordem (usados em POST).
- * Retorna um array de mensagens de erro; array vazio = sem erros.
- */
+//Valida os campos obrigatórios de uma ordem (usados em POST). Retorna um array de mensagens de erro; array vazio = sem erros.
 function validarCamposObrigatorios(body) {
   const erros = [];
   const camposObrigatorios = [
@@ -88,9 +75,7 @@ function validarCamposObrigatorios(body) {
   return erros;
 }
 
-/**
- * Retorna a chave textual do tipo de produto (usada em relatórios).
- */
+// Retorna a chave textual do tipo de produto (usada em relatórios).
 function chaveTipoProduto(tipoProduto) {
   switch (Number(tipoProduto)) {
     case 1:
@@ -104,9 +89,8 @@ function chaveTipoProduto(tipoProduto) {
   }
 }
 
-/**
- * Calcula custoUnitarioAjustado com base no tipoProduto.
- */
+// Calcula custoUnitarioAjustado com base no tipoProduto.
+
 function calcularCustoUnitarioAjustado(tipoProduto, custoUnitarioBase) {
   const custoBase = Number(custoUnitarioBase);
   switch (Number(tipoProduto)) {
@@ -121,19 +105,17 @@ function calcularCustoUnitarioAjustado(tipoProduto, custoUnitarioBase) {
   }
 }
 
-/**
- * Calcula o alertaEstoque com base no estoqueFinal.
- */
+// Calcula o alertaEstoque com base no estoqueFinal.
+
 function calcularAlertaEstoque(estoqueFinal) {
   if (estoqueFinal > 5000) return 'ALTO';
   if (estoqueFinal < 500) return 'CRITICO';
   return 'NORMAL';
 }
 
-/**
- * Recalcula todos os campos derivados de uma ordem (usado em POST e PUT).
- * Recebe o objeto "cru" com os campos base e devolve o objeto completo.
- */
+// Recalcula todos os campos derivados de uma ordem (usado em POST e PUT). 
+// Recebe o objeto "cru" com os campos base e devolve o objeto completo.
+
 function recalcularOrdem(ordemBase) {
   const quantidadeProduzida = Number(ordemBase.quantidadeProduzida);
   const custoUnitarioBase = Number(ordemBase.custoUnitarioBase);
@@ -159,9 +141,8 @@ function recalcularOrdem(ordemBase) {
   };
 }
 
-/**
- * Gera o relatório consolidado utilizado pelo endpoint /relatorios/ordens.
- */
+// Gera o relatório consolidado utilizado pelo endpoint /relatorios/ordens.
+
 function gerarRelatorioConsolidado() {
   const totalOrdens = ordens.length;
 
@@ -239,9 +220,8 @@ function gerarRelatorioConsolidado() {
   };
 }
 
-// -----------------------------------------------------------------------
+
 // Rotas
-// -----------------------------------------------------------------------
 
 // Rota raiz - informativa
 app.get('/', (req, res) => {
@@ -381,16 +361,14 @@ app.get('/relatorios/ordens', (req, res) => {
   return res.status(200).json(relatorio);
 });
 
-// -----------------------------------------------------------------------
+
 // Middleware de rota não encontrada
-// -----------------------------------------------------------------------
 app.use((req, res) => {
   res.status(404).json({ erro: 'Rota não encontrada.' });
 });
 
-// -----------------------------------------------------------------------
+
 // Inicialização do servidor
-// -----------------------------------------------------------------------
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
